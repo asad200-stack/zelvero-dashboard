@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zelvero">
+<meta name="theme-color" content="#030506">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Zelvero Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#030506; --panel:#0b1013; --panel2:#111a1e; --line:#1c272c; --text:#eef7f8; --mute:#8fa3a8; --acc:#2ee6f6; --acc-ink:#031114; --ok:#3ddc97; --warn:#ffb547; --bad:#ff6b6b; --r:16px; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--ink); color: var(--text); font: 15px/1.45 Inter, system-ui, sans-serif; }
+body { padding: env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom)); }
+.ar, [dir=rtl] { font-family: 'IBM Plex Sans Arabic', Inter, sans-serif; }
+header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px; background: rgb(3 5 6 / .92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+header img { width: 30px; height: 30px; border-radius: 8px; }
+header h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.01em; flex: 1; }
+.pill { font: 600 11px/1 Inter; padding: 6px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--mute); }
+.pill.live { color: var(--acc-ink); background: var(--ok); border-color: var(--ok); }
+.pill.dry { color: var(--warn); border-color: rgb(255 181 71 / .4); }
+main { padding: 14px 16px; max-width: 640px; margin: 0 auto; }
+h2 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; }
+.sub { color: var(--mute); margin: 0 0 14px; font-size: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; margin-bottom: 14px; }
+.row { display: flex; gap: 10px; align-items: center; }
+.grow { flex: 1; min-width: 0; }
+.tag { display: inline-block; font: 600 11px/1 Inter; padding: 5px 8px; border-radius: 99px; background: var(--panel2); color: var(--mute); margin-right: 6px; }
+.tag.ready { color: var(--acc); } .tag.approved { color: var(--ok); } .tag.published { color: var(--acc-ink); background: var(--ok); } .tag.failed, .tag.FIX { color: var(--bad); } .tag.PASS { color: var(--ok); } .tag.lead { color: var(--acc); }
+.media { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.media video, .media img { width: 100%; aspect-ratio: 9/16; object-fit: cover; border-radius: 12px; background: #000; display: block; }
+textarea, input, select { width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; font: inherit; }
+textarea { min-height: 120px; resize: vertical; }
+label { display: block; font-size: 12px; font-weight: 600; color: var(--mute); margin: 10px 0 6px; }
+button { font: 700 15px/1 Inter; border: 0; border-radius: 12px; padding: 14px 16px; cursor: pointer; }
+button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.primary { background: var(--acc); color: var(--acc-ink); }
+.ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+.danger { background: transparent; color: var(--bad); border: 1px solid rgb(255 107 107 / .35); }
+.actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; } .actions button { flex: 1; }
+nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: repeat(5, 1fr); background: rgb(8 12 14 / .96); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+nav button { background: none; color: var(--mute); padding: 10px 0 9px; font: 600 11px/1.2 Inter; display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 0; position: relative; }
+nav button svg { width: 22px; height: 22px; }
+nav button[aria-current=page] { color: var(--acc); }
+nav .badge { position: absolute; top: 6px; left: calc(50% + 6px); background: var(--acc); color: var(--acc-ink); border-radius: 99px; font-size: 10px; padding: 2px 5px; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.kpi b { display: block; font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
+.kpi span { color: var(--mute); font-size: 12px; font-weight: 600; }
+.msg { padding: 9px 12px; border-radius: 14px; margin: 6px 0; max-width: 85%; background: var(--panel2); white-space: pre-wrap; }
+.msg.us { margin-left: auto; background: rgb(46 230 246 / .12); }
+.day { font: 700 12px/1 Inter; color: var(--mute); margin: 18px 0 8px; letter-spacing: .02em; }
+.slot { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 8px; }
+.slot img { width: 54px; height: 96px; object-fit: cover; border-radius: 8px; }
+.agent { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.agent:last-child { border-bottom: 0; }
+.agent .n { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--panel2); color: var(--acc); font: 800 13px/1 Inter; flex: none; }
+.agent small { color: var(--mute); display: block; }
+.agent button { padding: 10px 12px; font-size: 13px; }
+.empty { text-align: center; color: var(--mute); padding: 40px 16px; }
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 9; background: var(--text); color: var(--ink); padding: 13px 16px; border-radius: 14px; font-weight: 600; transform: translateY(20px); opacity: 0; transition: .25s; pointer-events: none; }
+.toast.on { transform: none; opacity: 1; }
+.spark { width: 100%; height: 70px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; } td, th { padding: 8px 4px; border-bottom: 1px solid var(--line); text-align: right; } td:first-child, th:first-child { text-align: left; }
+th { color: var(--mute); font-weight: 600; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 14px; }
+.seg button { padding: 10px; background: none; color: var(--mute); font-size: 13px; } .seg button[aria-pressed=true] { background: var(--panel2); color: var(--text); }
+.md h1 { font-size: 18px; margin: 4px 0 8px; } .md h2 { font-size: 15px; margin: 14px 0 6px; } .md p, .md li { color: #cfe0e3; font-size: 14px; } .md ul { padding-left: 18px; margin: 6px 0; } .md a { color: var(--acc); } .md table { margin: 8px 0; display: block; overflow-x: auto; }
+.big { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 0; } .yes { color: var(--ok); } .no { color: var(--warn); }
+.basis { font: 700 10px/1 Inter; padding: 4px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 2px; } .basis.HYPOTHESIS { background: rgb(255 181 71 / .15); color: var(--warn); } .basis.TESTED { background: rgb(61 220 151 / .15); color: var(--ok); }
+.st { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; } .st.PASS { background: var(--ok); } .st.FAIL { background: var(--bad); } .st.BLOCKED { background: var(--warn); } .st.none { background: var(--line); }
+.slides { display: flex; gap: 8px; overflow-x: auto; margin: 12px 0; scroll-snap-type: x mandatory; } .slides img { width: 70%; flex: none; aspect-ratio: 4/5; object-fit: cover; border-radius: 12px; scroll-snap-align: start; }
+.feed div { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; } .feed small { color: var(--mute); display: block; }
+.setup ol { padding-left: 20px; color: var(--mute); } .setup li { margin: 6px 0; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style></head>
+<body>
+<header><img src="icon.png" alt=""><h1>Zelvero Agency</h1><span class="pill" id="mode">…</span></header>
+<main id="view"></main>
+<nav id="nav" hidden>
+  <button data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 3l9 8v10H3z"/></svg>Today<span class="badge" id="b-home" hidden></span></button>
+  <button data-tab="approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Content<span class="badge" id="b-approve" hidden></span></button>
+  <button data-tab="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12Z"/></svg>Leads<span class="badge" id="b-inbox" hidden></span></button>
+  <button data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Insights</button>
+  <button data-tab="agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Agents<span class="badge" id="b-agents" hidden></span></button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* Zelvero Agency dashboard. Every number shown comes from a file in the repo or from GitHub's own API: nothing is simulated. */
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
+let CFG = { repo: store.get('zv_repo') || '', token: store.get('zv_token') || '', api: store.get('zv_api') || 'https://api.github.com' };
+const $ = (s, el = document) => el.querySelector(s); const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const toast = (t) => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2800); };
+
+/* ---------- GitHub API ---------- */
+async function gh(path, opt = {}) {
+  const r = await fetch(`${CFG.api}/repos/${CFG.repo}${path}`, { ...opt, headers: { Authorization: `Bearer ${CFG.token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(opt.headers || {}) } });
+  if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+  return r.status === 204 ? null : r.json();
+}
+const b64d = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+const b64e = (s) => { const b = new TextEncoder().encode(s); let o = ''; b.forEach((x) => (o += String.fromCharCode(x))); return btoa(o); };
+async function readFile(path) { const d = await gh(`/contents/${path}`); return { path, sha: d.sha, text: b64d(d.content) }; }
+async function readJsonDoc(path) { const f = await readFile(path); return { path, sha: f.sha, data: JSON.parse(f.text) }; }
+async function readJson(path) { try { return (await readJsonDoc(path)).data; } catch { return null; } }
+async function readText(path) { try { return (await readFile(path)).text; } catch { return ''; } }
+async function writeJson(doc, msg) { const r = await gh(`/contents/${doc.path}`, { method: 'PUT', body: JSON.stringify({ message: msg, content: b64e(JSON.stringify(doc.data, null, 2) + '\n'), sha: doc.sha }) }); doc.sha = r.content.sha; return doc; }
+async function createJson(path, data, msg) { return gh(`/contents/${path}`, { method: 'PUT', body: JSON.stringify({ message: msg, content: b64e(JSON.stringify(data, null, 2) + '\n') }) }); }
+const blobCache = {};
+async function mediaUrl(path) {
+  if (!path) return ''; if (blobCache[path]) return blobCache[path];
+  const r = await fetch(`${CFG.api}/repos/${CFG.repo}/contents/${path}`, { headers: { Authorization: `Bearer ${CFG.token}`, Accept: 'application/vnd.github.raw' } });
+  if (!r.ok) return ''; return (blobCache[path] = URL.createObjectURL(await r.blob()));
+}
+async function dispatch(wf) { await gh(`/actions/workflows/${wf}/dispatches`, { method: 'POST', body: JSON.stringify({ ref: 'main' }) }); }
+const now = () => new Date().toISOString();
+const hist = (d, status) => { d.status = status; (d.history ||= []).push({ at: now(), by: 'you', status }); };
+
+/* ---------- load ---------- */
+let S = {}; let TREE = [];
+const P = (re) => TREE.filter((p) => re.test(p)).sort();
+async function loadAll() {
+  try { TREE = (await gh('/git/trees/main?recursive=1')).tree.filter((t) => t.type === 'blob').map((t) => t.path); } catch { TREE = []; }
+  const runsPaths = P(/^data\/runs\/.*\.json$/).slice(-60);
+  const [queue, inbox, latest, history, requests, runs, agents, leads] = await Promise.all([
+    Promise.all(P(/^content\/queue\/.*\.json$/).map(readJsonDoc)), Promise.all(P(/^content\/inbox\/.*\.json$/).map(readJsonDoc)),
+    readJson('data/analytics/latest.json'), readJson('data/analytics/history.json'), Promise.all(P(/^content\/requests\/.*\.json$/).slice(-30).map(readJsonDoc)),
+    Promise.all(runsPaths.map(readJson)), readJson('agents/agents.json'), readJson('content/leads.json')]);
+  const daily = P(/^data\/reports\/daily-\d{4}-\d\d-\d\d\.json$/).at(-1);
+  S = { queue: queue.sort((a, b) => (a.data.publish_at || '').localeCompare(b.data.publish_at || '')), inbox, latest, history: history || [], requests, runs: runs.filter(Boolean), agents: agents || [], leads: leads || [],
+    daily: daily ? await readJson(daily) : null, director: await readText((P(/^data\/reports\/daily-.*\.director\.md$/).at(-1)) || 'none') };
+  try { const v = await gh('/actions/variables/DRY_RUN'); setMode(v.value !== '0'); } catch { setMode(true); }
+  const nA = S.queue.filter((q) => q.data.status === 'ready').length, nI = S.inbox.filter((t) => ['new', 'drafted'].includes(t.data.status)).length, nE = S.runs.filter((r) => r.result === 'FAIL').length;
+  badge('b-approve', nA); badge('b-inbox', nI); badge('b-agents', nE);
+}
+function badge(id, n) { const b = document.getElementById(id); if (!b) return; b.hidden = !n; b.textContent = n; }
+function setMode(dry) { const m = $('#mode'); m.textContent = dry ? 'Test mode' : 'Live'; m.className = 'pill ' + (dry ? 'dry' : 'live'); }
+const fmtDay = (iso) => new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+const toLocalInput = (iso) => { const d = new Date(iso || Date.now()); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+const fromLocalInput = (v) => new Date(v).toISOString();
+function md(t) { // small, safe markdown → HTML (headings, lists, bold, italics, links, tables)
+  const lines = esc(t).split('\n'); let h = '', inList = false, inTable = false;
+  const inl = (x) => x.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>').replace(/\[(.+?)\]\((https?:[^)]+)\)/g, '<a href="$2">$1</a>');
+  for (const l of lines) {
+    if (/^\|/.test(l)) { if (/^\|[\s-|]+\|$/.test(l)) continue; const c = l.split('|').slice(1, -1).map((x) => `<td>${inl(x.trim())}</td>`).join(''); if (!inTable) { h += '<table>'; inTable = true; } h += `<tr>${c}</tr>`; continue; }
+    if (inTable) { h += '</table>'; inTable = false; }
+    if (/^- /.test(l)) { if (!inList) { h += '<ul>'; inList = true; } h += `<li>${inl(l.slice(2))}</li>`; continue; }
+    if (inList) { h += '</ul>'; inList = false; }
+    if (/^# /.test(l)) h += `<h1>${inl(l.slice(2))}</h1>`; else if (/^##+ /.test(l)) h += `<h2>${inl(l.replace(/^#+ /, ''))}</h2>`; else if (l.trim()) h += `<p>${inl(l)}</p>`;
+  }
+  return h + (inList ? '</ul>' : '') + (inTable ? '</table>' : '');
+}
+const basis = (b) => `<span class="basis ${esc(b)}">${esc(b)}</span>`;
+
+/* ---------- Today ---------- */
+const V = {};
+V.home = async () => {
+  const D = S.daily, d = D && D.decision;
+  let h = `<h2>Today</h2><p class="sub">${D ? 'Daily report for ' + esc(D.date) + ' · generated ' + ago(D.generated_at) : 'The daily report appears after the first daily run (Insights workflow, 07:15 Beirut).'}</p>`;
+  if (d) {
+    h += `<div class="card"><p class="sub" style="margin:0 0 4px">Publish today?</p><p class="big ${d.publish_today ? 'yes' : 'no'}">${d.publish_today ? 'Yes' : 'No'}</p><ul class="sub" style="margin:6px 0 0;padding-left:18px">${d.why.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
+      ${d.item ? `<p style="margin:10px 0 0"><b>${esc(d.item.title)}</b><br><span class="sub">${esc(d.item.type)} · ${d.item.publish_at ? fmtTime(d.item.publish_at) : ''} · ${esc(d.item.status)}</span></p>` : ''}</div>
+      <div class="card"><b>Recommendations</b>${['time', 'frequency', 'duration', 'customers'].map((k) => `<p style="margin:10px 0 0"><span class="sub">${{ time: 'Time', frequency: 'Frequency', duration: 'Video length', customers: 'What brings customers' }[k]}</span>${basis(d[k].basis)}<br>${esc(d[k].text)}<br><small class="sub">${esc(d[k].evidence)}</small></p>`).join('')}</div>`;
+    h += `<div class="card"><b>Priorities</b><ul style="padding-left:18px;margin:8px 0 0">${D.priorities.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>`;
+    if (D.inquiries.length) h += `<div class="card"><b>Customers waiting</b>${D.inquiries.map((q) => `<p class="sub" style="margin:8px 0 0">@${esc(q.from)} · ${esc(q.tag || q.kind)}: ${esc(q.last)}</p>`).join('')}</div>`;
+    h += `<div class="card"><b>Yesterday</b><p class="sub" style="margin:6px 0 0">${D.yesterday ? `Followers ${esc(D.yesterday.followers)} (${D.yesterday.followers_change ?? '?'} change) · views ${esc(D.yesterday.day?.views ?? '—')} · profile visits ${esc(D.yesterday.day?.profile_views ?? '—')}` : esc(D.data_note)}</p></div>`;
+    if (D.errors.length) h += `<div class="card" style="border-color:rgb(255 107 107 / .4)"><b>Errors</b>${D.errors.map((e) => `<p class="sub" style="margin:6px 0 0">${esc(e.what)}: ${esc(e.error)}</p>`).join('')}</div>`;
+  }
+  if (S.director) h += `<div class="card md">${md(S.director)}</div>`;
+  const seen = store.get('zv_seen') || '1970'; const fresh = feed().filter((f) => f.at > seen);
+  h += `<div class="card"><b>New since your last visit</b><div class="feed">${fresh.slice(0, 12).map((f) => `<div>${esc(f.text)}<small>${ago(f.at)}</small></div>`).join('') || '<div class="sub">Nothing new.</div>'}</div></div>`;
+  store.set('zv_seen', now());
+  $('#view').innerHTML = h;
+};
+function feed() { // activity history: queue/inbox history + agent runs
+  const ev = [];
+  for (const q of S.queue) for (const x of q.data.history || []) ev.push({ at: x.at, text: `${q.data.title || q.data.id}: ${x.status} (${x.by})` });
+  for (const t of S.inbox) for (const m of t.data.messages || []) if (m.from === 'them') ev.push({ at: m.at, text: `Message from @${t.data.from}: ${m.text.slice(0, 60)}` });
+  for (const r of S.runs) ev.push({ at: r.at, text: `${r.agent} ${r.result}: ${r.summary.slice(0, 90)}` });
+  return ev.sort((a, b) => b.at.localeCompare(a.at));
+}
+
+/* ---------- Content: approval center + calendar ---------- */
+let SEG = 'approve';
+V.approve = async () => {
+  let h = `<div class="seg" role="group"><button aria-pressed="${SEG === 'approve'}" data-seg="approve">To approve</button><button aria-pressed="${SEG === 'cal'}" data-seg="cal">Calendar</button></div>`;
+  if (SEG === 'cal') h += calendar(); else h += approvals();
+  $('#view').innerHTML = h; hydrateMedia();
+  $('#view').querySelectorAll('[data-seg]').forEach((b) => (b.onclick = () => { SEG = b.dataset.seg; V.approve(); }));
+  const t = $('#tick'); if (t) t.onclick = async () => { try { await dispatch('tick.yml'); toast('Publisher started. Check back in a minute.'); } catch (e) { toast('Could not start: ' + e.message); } };
+  $('#view').querySelectorAll('[data-dl]').forEach((b) => (b.onclick = async () => { for (const p of b.dataset.dl.split('|')) { const u = await mediaUrl(p); const a = document.createElement('a'); a.href = u; a.download = p.split('/').pop(); a.click(); } }));
+  $('#view').onclick = async (e) => { const b = e.target.closest('button[data-act]'); if (!b) return; const card = b.closest('.card'); const q = S.queue[+card.dataset.i]; const d = q.data;
+    d.caption = $('.cap', card).value; d.hashtags = $('.tags', card).value.split(/\s+/).filter(Boolean); d.publish_at = fromLocalInput($('.when', card).value); d.publish_mode = $('.how', card).value; b.disabled = true;
+    try {
+      if (b.dataset.act === 'approve') { if (d.qa && d.qa.result !== 'PASS' && !confirm('QA did not pass. Approve anyway?')) { b.disabled = false; return; } d.error = null; hist(d, 'approved'); await writeJson(q, `approve ${d.id}`); toast(d.publish_mode === 'manual' ? 'Approved. Post it from your phone at the time shown.' : `Approved for ${fmtDay(d.publish_at)} ${fmtTime(d.publish_at)}.`); }
+      else if (b.dataset.act === 'reject') { const why = prompt('What should the agents change? (optional)') || ''; hist(d, 'rejected'); d.feedback = why; await writeJson(q, `reject ${d.id}`); toast('Rejected. The agents will see your note.'); }
+      else { await writeJson(q, `edit ${d.id}`); toast('Saved'); }
+      render();
+    } catch (err) { toast('Could not save: ' + err.message); b.disabled = false; }
+  };
+};
+function approvals() {
+  const items = S.queue.filter((q) => ['ready', 'in-production', 'draft-script', 'failed'].includes(q.data.status));
+  let h = `<h2>Ready for you</h2><p class="sub">Nothing is posted until you approve it.</p>`;
+  if (!items.length) return h + `<div class="empty">All caught up.</div>`;
+  for (const q of items) { const d = q.data;
+    const media = d.slides ? `<div class="slides">${d.slides.map((s) => `<img data-src="${esc(s)}" alt="">`).join('')}</div>` : `<div class="media"><video data-src="${esc(d.preview)}" playsinline controls preload="none"></video><img data-src="${esc(d.cover)}" alt="Cover"></div>`;
+    h += `<article class="card" data-i="${S.queue.indexOf(q)}">
+      <div class="row"><div class="grow"><b>${esc(d.title || d.id)}</b><div class="sub" style="margin:2px 0 0">${esc(d.type)} · ${d.publish_at ? fmtDay(d.publish_at) + ', ' + fmtTime(d.publish_at) : 'no time'}</div></div><span class="tag ${esc(d.status)}">${esc(d.status)}</span>${d.qa ? `<span class="tag ${esc(d.qa.result)}">QA ${esc(d.qa.result)}</span>` : ''}</div>
+      ${media}
+      ${d.hook ? `<p class="sub" style="margin:0">Hook (0–3 s): <b style="color:var(--text)">${esc(d.hook.en)}</b> · <span dir="rtl">${esc(d.hook.ar)}</span></p>` : ''}
+      ${d.qa && d.qa.notes && d.qa.notes.length ? `<p class="sub">${d.qa.notes.map(esc).join('<br>')}</p>` : ''}
+      ${d.error ? `<p class="sub" style="color:var(--bad)">${esc(d.error)}</p>` : ''}
+      <label>Caption</label><textarea class="cap" dir="auto">${esc(d.caption)}</textarea>
+      <label>Hashtags</label><input class="tags" value="${esc((d.hashtags || []).join(' '))}">
+      <div class="row"><div class="grow"><label>Publish at</label><input class="when" type="datetime-local" value="${toLocalInput(d.publish_at)}"></div>
+      <div style="width:42%"><label>How</label><select class="how"><option value="api" ${d.publish_mode !== 'manual' ? 'selected' : ''}>Auto-post</option><option value="manual" ${d.publish_mode === 'manual' ? 'selected' : ''}>I'll post (music)</option></select></div></div>
+      <div class="actions"><button class="primary" data-act="approve">${d.status === 'failed' ? 'Retry' : 'Approve'}</button><button class="ghost" data-act="save">Save</button><button class="danger" data-act="reject">Reject</button></div></article>`; }
+  return h;
+}
+function calendar() {
+  const items = S.queue.filter((q) => q.data.publish_at && q.data.status !== 'rejected'); let h = `<h2>Calendar</h2><p class="sub">Auto-posts go out within 30 minutes of their time (09:00–23:30 Beirut).</p>`, last = '';
+  for (const q of items) { const d = q.data, day = fmtDay(d.publish_at);
+    if (day !== last) { h += `<div class="day">${day.toUpperCase()}</div>`; last = day; }
+    const files = d.slides ? d.slides.join('|') : d.preview;
+    h += `<div class="slot"><img data-src="${esc(d.cover)}" alt=""><div class="grow"><b>${esc(d.title || d.id)}</b><div class="sub" style="margin:4px 0">${fmtTime(d.publish_at)} · ${esc(d.type)} · ${d.publish_mode === 'manual' ? 'you post' : 'auto-post'}</div>
+      <span class="tag ${esc(d.status)}">${esc(d.status)}</span>${d.permalink ? `<a href="${esc(d.permalink)}" style="color:var(--acc)">Open</a>` : ''}
+      ${d.publish_mode === 'manual' && ['approved', 'ready'].includes(d.status) ? `<button class="ghost" style="margin-top:8px;padding:10px 12px" data-dl="${esc(files)}">Save to phone</button>` : ''}</div></div>`; }
+  return h + (items.length ? '' : `<div class="empty">Nothing scheduled.</div>`) + `<div class="actions"><button class="ghost" id="tick">Run publisher now</button></div>`;
+}
+
+/* ---------- Leads + inbox ---------- */
+V.inbox = async () => {
+  const th = S.inbox.sort((a, b) => (b.data.messages.at(-1)?.at || '').localeCompare(a.data.messages.at(-1)?.at || ''));
+  const leads = th.filter((t) => t.data.tag === 'lead');
+  let h = `<h2>Leads & messages</h2><p class="sub">${leads.length} lead(s) · ${th.length} conversation(s). Replies are sent only when you tap Send.</p>`;
+  if (!th.length) h += `<div class="empty">No messages synced yet. They appear once Instagram is connected (every 30 min).</div>`;
+  for (const t of th) { const d = t.data;
+    h += `<article class="card" data-p="${esc(t.path)}"><div class="row"><div class="grow"><b>@${esc(d.from || 'someone')}</b> <span class="sub">${d.kind === 'dm' ? 'DM' : 'comment'}</span></div>${d.tag ? `<span class="tag ${esc(d.tag)}">${esc(d.tag)}</span>` : ''}<span class="tag">${esc(d.status)}</span></div>
+      ${d.messages.slice(-4).map((m) => `<div class="msg ${m.from === 'us' ? 'us' : ''}" dir="auto">${esc(m.text)}</div>`).join('')}
+      ${['sent', 'ignored'].includes(d.status) ? '' : `<label>Reply</label><textarea class="draft" dir="auto">${esc(d.draft)}</textarea>
+      <label>Lead stage</label><select class="stage"><option value="">—</option>${['new', 'qualified', 'demo', 'won', 'lost'].map((s) => `<option ${d.stage === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
+      <div class="actions"><button class="primary" data-act="send">Send</button><button class="ghost" data-act="draft">Ask agent to draft</button><button class="danger" data-act="ignore">Ignore</button></div>`}
+      ${d.error ? `<p class="sub" style="color:var(--bad)">${esc(d.error)}</p>` : ''}</article>`; }
+  $('#view').innerHTML = h;
+  $('#view').onclick = async (e) => { const b = e.target.closest('button[data-act]'); if (!b) return; const card = b.closest('.card'); const t = S.inbox.find((x) => x.path === card.dataset.p); const d = t.data;
+    d.draft = $('.draft', card).value; const st = $('.stage', card); if (st && st.value) { d.stage = st.value; if (st.value !== 'new') d.tag = 'lead'; } b.disabled = true;
+    try {
+      if (b.dataset.act === 'send') { if (!d.draft.trim()) { toast('Write the reply first'); b.disabled = false; return; } hist(d, 'approved'); await writeJson(t, `approve reply ${d.id}`); await dispatch('tick.yml').catch(() => {}); toast('Approved. Sending within a minute.'); }
+      else if (b.dataset.act === 'ignore') { hist(d, 'ignored'); await writeJson(t, `ignore ${d.id}`); toast('Ignored'); }
+      else { await writeJson(t, `stage ${d.id}`); await createJson(`content/requests/${Date.now()}-11-sales-community.json`, { agent: '11-sales-community', note: `Draft a reply for ${t.path}`, at: now(), status: 'pending' }, 'request reply draft'); toast('Asked the Sales & Community agent.'); }
+      render();
+    } catch (err) { toast('Could not save: ' + err.message); b.disabled = false; }
+  };
+};
+
+/* ---------- Insights: analytics, reports, research ---------- */
+let ISEG = 'analytics';
+V.stats = async () => {
+  let h = `<div class="seg" style="grid-template-columns:repeat(3,1fr)"><button aria-pressed="${ISEG === 'analytics'}" data-s="analytics">Analytics</button><button aria-pressed="${ISEG === 'reports'}" data-s="reports">Reports</button><button aria-pressed="${ISEG === 'research'}" data-s="research">Research</button></div>`;
+  if (ISEG === 'analytics') { const L = S.latest, H = S.history;
+    h += `<h2>Analytics</h2><p class="sub">${L ? 'Synced ' + ago(L.at) + ' from the official Instagram API.' : 'No API data yet: syncs daily once Instagram is connected.'}</p>`;
+    if (L) { const d = L.day || {};
+      h += `<div class="kpis"><div class="kpi"><b>${L.followers ?? '—'}</b><span>Followers</span></div><div class="kpi"><b>${L.posts ?? '—'}</b><span>Posts</span></div><div class="kpi"><b>${d.views ?? '—'}</b><span>Views, last day</span></div><div class="kpi"><b>${d.profile_views ?? '—'}</b><span>Profile visits, last day</span></div></div>`;
+      if (H.length > 1) h += `<div class="card"><b>Followers</b>${spark(H.map((x) => x.followers || 0))}<div class="sub" style="margin:0">Goal: 1,000</div></div>`;
+      h += `<div class="card"><b>Posts</b><table><tr><th>Post</th><th>Views</th><th>Shares</th><th>Saves</th></tr>${(L.media || []).map((m) => `<tr><td>${m.permalink ? `<a style="color:var(--acc)" href="${esc(m.permalink)}">${esc((m.caption || m.id).slice(0, 24))}…</a>` : esc(m.id)}</td><td>${m.metrics?.views ?? '—'}</td><td>${m.metrics?.shares ?? '—'}</td><td>${m.metrics?.saved ?? '—'}</td></tr>`).join('')}</table></div>`; }
+    h += `<div class="actions"><button class="ghost" id="sync">Sync now</button></div>`; }
+  else { const files = ISEG === 'reports' ? P(/^data\/reports\/(weekly|monthly|daily-.*\.director).*\.md$/).concat(['data/decisions.md'].filter((p) => TREE.includes(p))) : P(/^content\/(research|plan)\/.*\.md$/);
+    h += `<h2>${ISEG === 'reports' ? 'Reports' : 'Research'}</h2><p class="sub">${ISEG === 'reports' ? 'Weekly and monthly reports, the director\'s briefs and the decision log.' : 'Market, trends, competitors, growth and the content plan. Facts have source links; guesses are marked as hypotheses.'}</p>`;
+    const texts = await Promise.all(files.slice().reverse().slice(0, 8).map(readText));
+    files.slice().reverse().slice(0, 8).forEach((f, i) => { h += `<details class="card md" ${i === 0 ? 'open' : ''}><summary><b>${esc(f.split('/').pop())}</b></summary>${md(texts[i])}</details>`; });
+    if (!files.length) h += `<div class="empty">Nothing yet.</div>`; }
+  $('#view').innerHTML = h;
+  $('#view').querySelectorAll('[data-s]').forEach((b) => (b.onclick = () => { ISEG = b.dataset.s; V.stats(); }));
+  const s = $('#sync'); if (s) s.onclick = async () => { try { await dispatch('insights.yml'); toast('Sync started. Refresh in a minute.'); } catch (e) { toast(e.message); } };
+};
+function spark(vals) { const w = 300, h = 70, mx = Math.max(...vals, 1), mn = Math.min(...vals, 0); const pts = vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * w},${h - 6 - ((v - mn) / Math.max(1, mx - mn)) * (h - 12)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Followers over time"><polyline points="${pts}" fill="none" stroke="var(--acc)" stroke-width="2.5"/></svg>`; }
+
+/* ---------- Agents: real status, requests, costs, errors ---------- */
+V.agents = async () => {
+  const last = {}; for (const r of S.runs) if (!last[r.agent] || r.at > last[r.agent].at) last[r.agent] = r;
+  let h = `<h2>Agents</h2><p class="sub">Status comes from each agent's last recorded run (data/runs). Requests are picked up on the next agency run.</p>
+    <div class="card"><label for="req">Ask the team</label><textarea id="req" placeholder="e.g. A Reel about the cash drawer report for restaurants, funny hook"></textarea></div><div class="card">`;
+  for (const a of S.agents) { const r = last[a.slug]; const n = a.slug.slice(0, 2);
+    h += `<div class="agent"><div class="n">${n}</div><div class="grow"><b><span class="st ${r ? r.result : 'none'}"></span>${esc(a.name)}</b><small>${r ? `${r.result} · ${ago(r.at)} · ${esc(r.summary.slice(0, 110))}` : 'No run recorded yet · ' + esc(a.when)}</small></div><button class="ghost" data-a="${esc(a.slug)}">${n === '10' ? 'Run' : 'Ask'}</button></div>`; }
+  const pending = S.requests.filter((r) => r.data.status === 'pending');
+  h += `</div>${pending.length ? `<div class="card"><b>Waiting for the next run</b>${pending.map((r) => `<p class="sub" style="margin:6px 0 0">${esc(r.data.agent)}: ${esc(r.data.note)}</p>`).join('')}</div>` : ''}`;
+  h += `<div class="card" id="costs"><b>Usage and cost</b><p class="sub">Loading GitHub Actions runs…</p></div><div class="card" id="errs"><b>Errors</b><p class="sub">Loading…</p></div>
+    <div class="card"><b>Activity history</b><div class="feed">${feed().slice(0, 25).map((f) => `<div>${esc(f.text)}<small>${new Date(f.at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}</small></div>`).join('')}</div></div>
+    <div class="card"><b>Connection</b><p class="sub" style="margin:6px 0">${esc(CFG.repo)}</p><button class="danger" id="logout">Remove key from this phone</button></div>`;
+  $('#view').innerHTML = h;
+  $('#view').querySelectorAll('[data-a]').forEach((b) => (b.onclick = async () => { const slug = b.dataset.a;
+    try { if (slug.startsWith('10')) { await dispatch('tick.yml'); toast('Publisher started'); return; }
+      const note = $('#req').value.trim() || 'Do your regular job now'; await createJson(`content/requests/${Date.now()}-${slug}.json`, { agent: slug, note, at: now(), status: 'pending' }, `request ${slug}`); $('#req').value = ''; toast('Request queued'); await loadAll(); V.agents(); } catch (e) { toast(e.message); } }));
+  $('#logout').onclick = () => { store.del('zv_token'); location.reload(); };
+  // real costs: minutes from GitHub's own run records this month (rounded up per job, as GitHub bills)
+  try { const since = new Date(); since.setDate(1); const runs = (await gh(`/actions/runs?per_page=100&created=>=${since.toISOString().slice(0, 10)}`)).workflow_runs || [];
+    let min = 0; const byWf = {}; for (const r of runs) { const m = Math.max(1, Math.ceil((new Date(r.updated_at) - new Date(r.run_started_at || r.created_at)) / 60000)); min += m; byWf[r.name] = (byWf[r.name] || 0) + m; }
+    const fails = runs.filter((r) => r.conclusion === 'failure');
+    const claudeRuns = S.runs.filter((r) => r.runner === 'claude' && r.at >= since.toISOString()).length;
+    $('#costs').innerHTML = `<b>Usage and cost</b><p class="sub" style="margin:6px 0">This month: <b style="color:var(--text)">~${min} of 2,000</b> free GitHub Actions minutes (estimate from ${runs.length} runs; private repos round each job up to a minute). Cost: $0 while under 2,000.</p>${Object.entries(byWf).map(([k, v]) => `<p class="sub" style="margin:2px 0">${esc(k)}: ${v} min</p>`).join('')}<p class="sub" style="margin:8px 0 0">Claude agent runs recorded this month: ${claudeRuns}. Included in Claude Pro (usage limits apply; Anthropic does not expose per-run token counts here).</p>`;
+    const logFails = S.runs.filter((r) => r.result !== 'PASS').slice(-10).reverse();
+    $('#errs').innerHTML = `<b>Errors and blocked items</b>${fails.slice(0, 8).map((r) => `<p class="sub" style="margin:6px 0 0"><a style="color:var(--bad)" href="${esc(r.html_url)}">${esc(r.name)} failed</a> · ${ago(r.created_at)}</p>`).join('')}${logFails.map((r) => `<p class="sub" style="margin:6px 0 0"><span class="st ${r.result}"></span>${esc(r.agent)} ${r.result}: ${esc(r.summary.slice(0, 120))}</p>`).join('') || (fails.length ? '' : '<p class="sub">None.</p>')}`;
+  } catch (e) { $('#costs').innerHTML = `<b>Usage and cost</b><p class="sub">Could not read Actions runs (${esc(e.message)}). The key needs "Actions: Read".</p>`; $('#errs').innerHTML = '<b>Errors</b><p class="sub">Unavailable</p>'; }
+};
+async function hydrateMedia() { for (const el of document.querySelectorAll('[data-src]')) { const p = el.dataset.src; if (p) mediaUrl(p).then((u) => { if (u) el.src = u; }); } }
+
+/* ---------- setup + routing ---------- */
+function setupView(err) {
+  $('#nav').hidden = true;
+  $('#view').innerHTML = `<h2>Connect your agency</h2><p class="sub">One time on this phone. The key stays only on this device.</p>${err ? `<p class="card" style="color:var(--bad)">${esc(err)}</p>` : ''}
+    <div class="card"><label for="repo">Repository</label><input id="repo" placeholder="your-github-name/zelvero-agency" value="${esc(CFG.repo)}" autocapitalize="off" autocorrect="off">
+    <label for="tok">GitHub access key</label><input id="tok" type="password" placeholder="github_pat_…" autocomplete="off"><div class="actions"><button class="primary" id="go">Connect</button></div></div>
+    <div class="card setup"><b>How to get the key</b><ol><li>github.com → Settings → Developer settings → Fine-grained tokens → Generate.</li><li>Repository access: only <b>zelvero-agency</b>.</li><li>Permissions: Contents <b>Read and write</b>, Actions <b>Read and write</b>, Variables <b>Read</b>.</li><li>Copy it and paste it above.</li></ol></div>`;
+  $('#go').onclick = () => { CFG.repo = $('#repo').value.trim(); CFG.token = $('#tok').value.trim(); store.set('zv_repo', CFG.repo); store.set('zv_token', CFG.token); boot(); };
+}
+let TAB = 'home';
+async function render() { await loadAll(); $('#nav').hidden = false; document.querySelectorAll('nav button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === TAB ? 'page' : 'false')); await V[TAB](); window.scrollTo(0, 0); }
+document.querySelectorAll('nav button').forEach((b) => (b.onclick = () => { TAB = b.dataset.tab; render(); }));
+async function boot() { if (!CFG.repo || !CFG.token) return setupView(); $('#view').innerHTML = '<div class="empty">Loading…</div>'; try { await gh(''); await render(); } catch (e) { setupView('Could not open the repository: ' + e.message); } }
+boot();
+</script></body></html>

@@ -162,7 +162,9 @@ const basis = (b) => `<span class="basis ${esc(b)}">${esc(b)}</span>`;
 const V = {};
 V.home = async () => {
   const D = S.daily, d = D && D.decision;
-  let h = `<h2>Today</h2><p class="sub">${D ? 'Daily report for ' + esc(D.date) + ' · generated ' + ago(D.generated_at) : 'The daily report appears after the first daily run (Insights workflow, 07:15 Beirut).'}</p>`;
+  const due = S.queue.filter((q) => q.data.status === 'approved' && q.data.publish_mode === 'manual' && q.data.publish_at && new Date(q.data.publish_at) - Date.now() < 18 * 3600e3);
+  let h = due.length ? `<h2>Post now</h2><p class="sub">Approved and due. You pick the song in Instagram.</p>${due.map(postCard).join('')}` : '';
+  h += `<h2>Today</h2><p class="sub">${D ? 'Daily report for ' + esc(D.date) + ' · generated ' + ago(D.generated_at) : 'The daily report appears after the first daily run (Insights workflow, 07:15 Beirut).'}</p>`;
   if (d) {
     h += `<div class="card"><p class="sub" style="margin:0 0 4px">Publish today?</p><p class="big ${d.publish_today ? 'yes' : 'no'}">${d.publish_today ? 'Yes' : 'No'}</p><ul class="sub" style="margin:6px 0 0;padding-left:18px">${d.why.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
       ${d.item ? `<p style="margin:10px 0 0"><b>${esc(d.item.title)}</b><br><span class="sub">${esc(d.item.type)} · ${d.item.publish_at ? fmtTime(d.item.publish_at) : ''} · ${esc(d.item.status)}</span></p>` : ''}</div>
@@ -176,7 +178,8 @@ V.home = async () => {
   const seen = store.get('zv_seen') || '1970'; const fresh = feed().filter((f) => f.at > seen);
   h += `<div class="card"><b>New since your last visit</b><div class="feed">${fresh.slice(0, 12).map((f) => `<div>${esc(f.text)}<small>${ago(f.at)}</small></div>`).join('') || '<div class="sub">Nothing new.</div>'}</div></div>`;
   store.set('zv_seen', now());
-  $('#view').innerHTML = h;
+  $('#view').innerHTML = h; hydrateMedia();
+  $('#view').onclick = (e) => { postClick(e); };
 };
 function feed() { // activity history: queue/inbox history + agent runs
   const ev = [];
@@ -195,10 +198,10 @@ V.approve = async () => {
   $('#view').querySelectorAll('[data-seg]').forEach((b) => (b.onclick = () => { SEG = b.dataset.seg; V.approve(); }));
   const t = $('#tick'); if (t) t.onclick = async () => { try { await dispatch('tick.yml'); toast('Publisher started. Check back in a minute.'); } catch (e) { toast('Could not start: ' + e.message); } };
   $('#view').querySelectorAll('[data-dl]').forEach((b) => (b.onclick = async () => { for (const p of b.dataset.dl.split('|')) { const u = await mediaUrl(p); const a = document.createElement('a'); a.href = u; a.download = p.split('/').pop(); a.click(); } }));
-  $('#view').onclick = async (e) => { const b = e.target.closest('button[data-act]'); if (!b) return; const card = b.closest('.card'); const q = S.queue[+card.dataset.i]; const d = q.data;
+  $('#view').onclick = async (e) => { if (await postClick(e)) return; const b = e.target.closest('button[data-act]'); if (!b) return; const card = b.closest('.card'); const q = S.queue[+card.dataset.i]; const d = q.data;
     d.caption = $('.cap', card).value; d.hashtags = $('.tags', card).value.split(/\s+/).filter(Boolean); d.publish_at = fromLocalInput($('.when', card).value); d.publish_mode = $('.how', card).value; b.disabled = true;
     try {
-      if (b.dataset.act === 'approve') { if (d.qa && d.qa.result !== 'PASS' && !confirm('QA did not pass. Approve anyway?')) { b.disabled = false; return; } d.error = null; hist(d, 'approved'); await writeJson(q, `approve ${d.id}`); toast(d.publish_mode === 'manual' ? 'Approved. Post it from your phone at the time shown.' : `Approved for ${fmtDay(d.publish_at)} ${fmtTime(d.publish_at)}.`); }
+      if (b.dataset.act === 'approve') { if (d.qa && d.qa.result !== 'PASS' && !confirm('QA did not pass. Approve anyway?')) { b.disabled = false; return; } d.error = null; hist(d, 'approved'); await writeJson(q, `approve ${d.id}`); toast(d.publish_mode === 'manual' ? 'Approved. On the day it appears under “Post now”.' : `Approved for ${fmtDay(d.publish_at)} ${fmtTime(d.publish_at)}.`); }
       else if (b.dataset.act === 'reject') { const why = prompt('What should the agents change? (optional)') || ''; hist(d, 'rejected'); d.feedback = why; await writeJson(q, `reject ${d.id}`); toast('Rejected. The agents will see your note.'); }
       else { await writeJson(q, `edit ${d.id}`); toast('Saved'); }
       render();
@@ -220,7 +223,7 @@ function approvals() {
       <label>Caption</label><textarea class="cap" dir="auto">${esc(d.caption)}</textarea>
       <label>Hashtags</label><input class="tags" value="${esc((d.hashtags || []).join(' '))}">
       <div class="row"><div class="grow"><label>Publish at</label><input class="when" type="datetime-local" value="${toLocalInput(d.publish_at)}"></div>
-      <div style="width:42%"><label>How</label><select class="how"><option value="api" ${d.publish_mode !== 'manual' ? 'selected' : ''}>Auto-post</option><option value="manual" ${d.publish_mode === 'manual' ? 'selected' : ''}>I'll post (music)</option></select></div></div>
+      <div style="width:42%"><label>How</label><select class="how"><option value="api" ${d.publish_mode !== 'manual' ? 'selected' : ''}>Auto-post</option><option value="manual" ${d.publish_mode === 'manual' ? 'selected' : ''}>I post (my song)</option></select></div></div>
       <div class="actions"><button class="primary" data-act="approve">${d.status === 'failed' ? 'Retry' : 'Approve'}</button><button class="ghost" data-act="save">Save</button><button class="danger" data-act="reject">Reject</button></div></article>`; }
   return h;
 }
@@ -231,9 +234,32 @@ function calendar() {
     const files = d.slides ? d.slides.join('|') : d.preview;
     h += `<div class="slot"><img data-src="${esc(d.cover)}" alt=""><div class="grow"><b>${esc(d.title || d.id)}</b><div class="sub" style="margin:4px 0">${fmtTime(d.publish_at)} · ${esc(d.type)} · ${d.publish_mode === 'manual' ? 'you post' : 'auto-post'}</div>
       <span class="tag ${esc(d.status)}">${esc(d.status)}</span>${d.permalink ? `<a href="${esc(d.permalink)}" style="color:var(--acc)">Open</a>` : ''}
-      ${d.publish_mode === 'manual' && ['approved', 'ready'].includes(d.status) ? `<button class="ghost" style="margin-top:8px;padding:10px 12px" data-dl="${esc(files)}">Save to phone</button>` : ''}</div></div>`; }
+      </div></div>${d.publish_mode === 'manual' && d.status === 'approved' ? postCard(q) : ''}`; }
   return h + (items.length ? '' : `<div class="empty">Nothing scheduled.</div>`) + `<div class="actions"><button class="ghost" id="tick">Run publisher now</button></div>`;
 }
+
+
+/* ---------- Post on Instagram (owner picks the music) ----------
+   iOS only shares files from a tap, so: tap 1 downloads the video, tap 2 copies the caption and opens the share sheet → Instagram. */
+const caption = (d) => ((d.caption || '') + ((d.hashtags || []).length ? '\n\n' + d.hashtags.join(' ') : '')).trim();
+function postCard(q) { const d = q.data; const i = S.queue.indexOf(q);
+  return `<article class="card" data-post="${i}"><div class="row"><img data-src="${esc(d.cover)}" alt="" style="width:54px;height:96px;object-fit:cover;border-radius:8px"><div class="grow"><b>${esc(d.title)}</b><div class="sub" style="margin:4px 0 0">${esc(d.type)} · ${d.publish_at ? fmtDay(d.publish_at) + ' ' + fmtTime(d.publish_at) : ''}</div></div></div>
+    <ol class="sub" style="margin:10px 0 0;padding-left:18px"><li>Prepare, then Open Instagram.</li><li>Choose <b>Reel</b>${d.type === 'carousel' ? ' / Post' : ''}, add <b>your song</b>.</li><li>Tap the caption box → <b>Paste</b> (already copied) → Share.</li></ol>
+    <div class="actions"><button class="primary" data-step="prep">1 · Prepare</button><button class="ghost" data-step="done">I posted it ✓</button></div></article>`; }
+const FILES = {};
+async function postClick(e) {
+  const b = e.target.closest('button[data-step]'); if (!b) return false; const card = b.closest('[data-post]'); const q = S.queue[+card.dataset.post]; const d = q.data;
+  if (b.dataset.step === 'prep') { b.disabled = true; b.textContent = 'Preparing…';
+    try { const paths = d.slides || [`media/library/${d.video_asset}`]; FILES[d.id] = await Promise.all(paths.map(async (p, k) => { const u = await mediaUrl(p); const bl = await (await fetch(u)).blob(); return new File([bl], `zelvero-${d.id}-${k + 1}.${p.split('.').pop()}`, { type: bl.type || (p.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg') }); }));
+      b.textContent = '2 · Open Instagram'; b.dataset.step = 'share'; b.disabled = false; toast('Ready. Tap “Open Instagram”.');
+    } catch (err) { b.disabled = false; b.textContent = '1 · Prepare'; toast('Could not load the video: ' + err.message); } return true; }
+  if (b.dataset.step === 'share') { const files = FILES[d.id];
+    try { await navigator.clipboard.writeText(caption(d)); } catch {}
+    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); toast('Caption copied. In Instagram: add your song, paste the caption, Share.'); } catch (err) { if (err.name !== 'AbortError') toast(err.message); } }
+    else { for (const f of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); } toast('Saved to your phone and caption copied. Open Instagram → Reel → pick it.'); }
+    return true; }
+  if (b.dataset.step === 'done') { if (!confirm('Mark as posted on Instagram?')) return true; d.posted_at = now(); d.publish_mode = 'manual'; hist(d, 'published'); await writeJson(q, `posted ${d.id} (manual)`); toast('Marked as posted. Insights will track it.'); render(); return true; }
+  return false; }
 
 /* ---------- Leads + inbox ---------- */
 V.inbox = async () => {

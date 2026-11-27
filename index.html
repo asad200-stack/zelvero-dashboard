@@ -253,9 +253,16 @@ function calendar() {
 const caption = (d) => ((d.caption || '') + ((d.hashtags || []).length ? '\n\n' + d.hashtags.join(' ') : '')).trim();
 function postCard(q) { const d = q.data; const i = S.queue.indexOf(q);
   return `<article class="card" data-post="${i}"><div class="row"><img data-src="${esc(d.cover)}" alt="" style="width:54px;height:96px;object-fit:cover;border-radius:8px"><div class="grow"><b>${esc(d.title)}</b><div class="sub" style="margin:4px 0 0">${esc(d.type)} · ${d.publish_at ? fmtDay(d.publish_at) + ' ' + fmtTime(d.publish_at) : ''}</div></div></div>
-    <ol class="sub" style="margin:10px 0 0;padding-left:18px"><li>Prepare, then Open Instagram.</li><li>Choose <b>Reel</b>${d.type === 'carousel' ? ' / Post' : ''}, add <b>your song</b>.</li><li>Tap the caption box → <b>Paste</b> (already copied) → Share.</li></ol>
-    <div class="actions"><button class="primary" data-step="prep">1 · Prepare</button><button class="ghost" data-step="done">I posted it ✓</button></div></article>`; }
+    <ol class="sub" style="margin:10px 0 0;padding-left:18px"><li>Prepare, then Open Instagram.</li><li>Choose <b>Reel</b>${d.type === 'carousel' ? ' / Post' : ''}, add <b>your song</b>.</li><li>Instagram never fills the caption by itself: tap the caption box, hold, <b>Paste</b>. Lost it? Tap <b>Copy caption</b> again.</li></ol>
+    <textarea dir="auto" readonly rows="4" style="width:100%;margin-top:10px;font:inherit;font-size:13px;background:transparent;color:inherit;border:1px solid #2a3238;border-radius:8px;padding:8px;resize:vertical" aria-label="Caption">${esc(caption(d))}</textarea>
+    <div class="actions"><button class="primary" data-step="prep">1 · Prepare</button><button class="ghost" data-step="copy">Copy caption</button><button class="ghost" data-step="done">I posted it ✓</button></div></article>`; }
 const FILES = {};
+async function copyCaption(d, card) {
+  try { await navigator.clipboard.writeText(caption(d)); return true; } catch {}
+  const t = card.querySelector('textarea'); if (!t) return false;   // older iOS fallback
+  t.removeAttribute('readonly'); t.focus(); t.setSelectionRange(0, t.value.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch {} t.setAttribute('readonly', ''); t.blur(); return ok;
+}
 async function postClick(e) {
   const b = e.target.closest('button[data-step]'); if (!b) return false; const card = b.closest('[data-post]'); const q = S.queue[+card.dataset.post]; const d = q.data;
   if (b.dataset.step === 'prep') { b.disabled = true; b.textContent = 'Preparing…';
@@ -263,10 +270,11 @@ async function postClick(e) {
       b.textContent = '2 · Open Instagram'; b.dataset.step = 'share'; b.disabled = false; toast('Ready. Tap “Open Instagram”.');
     } catch (err) { b.disabled = false; b.textContent = '1 · Prepare'; toast('Could not load the video: ' + err.message); } return true; }
   if (b.dataset.step === 'share') { const files = FILES[d.id];
-    try { await navigator.clipboard.writeText(caption(d)); } catch {}
-    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); toast('Caption copied. In Instagram: add your song, paste the caption, Share.'); } catch (err) { if (err.name !== 'AbortError') toast(err.message); } }
+    let copied = await copyCaption(d, card);
+    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); toast(copied ? 'Caption copied. In Instagram: hold the caption box → Paste.' : 'Video sent. Back here, tap Copy caption, then paste it in Instagram.'); } catch (err) { if (err.name !== 'AbortError') toast(err.message); } }
     else { for (const f of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); } toast('Saved to your phone and caption copied. Open Instagram → Reel → pick it.'); }
     return true; }
+  if (b.dataset.step === 'copy') { toast(await copyCaption(d, card) ? 'Caption copied. In Instagram: hold the caption box → Paste.' : 'Copy blocked: hold the caption text above → Select all → Copy.'); return true; }
   if (b.dataset.step === 'done') { if (!confirm('Mark as posted on Instagram?')) return true; d.posted_at = now(); d.publish_mode = 'manual'; hist(d, 'published'); await writeJson(q, `posted ${d.id} (manual)`); toast('Marked as posted. Insights will track it.'); render(); return true; }
   return false; }
 

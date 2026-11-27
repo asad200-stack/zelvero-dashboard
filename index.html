@@ -251,12 +251,25 @@ function calendar() {
 /* ---------- Post on Instagram (owner picks the music) ----------
    iOS only shares files from a tap, so: tap 1 downloads the video, tap 2 copies the caption and opens the share sheet → Instagram. */
 const caption = (d) => ((d.caption || '') + ((d.hashtags || []).length ? '\n\n' + d.hashtags.join(' ') : '')).trim();
-function postCard(q) { const d = q.data; const i = S.queue.indexOf(q);
+function postCard(q) { const d = q.data; const i = S.queue.indexOf(q); const cover = d.cover && d.type !== 'carousel';
+  setTimeout(prepCovers, 0);
   return `<article class="card" data-post="${i}"><div class="row"><img data-src="${esc(d.cover)}" alt="" style="width:54px;height:96px;object-fit:cover;border-radius:8px"><div class="grow"><b>${esc(d.title)}</b><div class="sub" style="margin:4px 0 0">${esc(d.type)} · ${d.publish_at ? fmtDay(d.publish_at) + ' ' + fmtTime(d.publish_at) : ''}</div></div></div>
-    <ol class="sub" style="margin:10px 0 0;padding-left:18px"><li>Prepare, then Open Instagram.</li><li>Choose <b>Reel</b>${d.type === 'carousel' ? ' / Post' : ''}, add <b>your song</b>.</li><li>Instagram never fills the caption by itself: tap the caption box, hold, <b>Paste</b>. Lost it? Tap <b>Copy caption</b> again.</li></ol>
-    <textarea dir="auto" readonly rows="4" style="width:100%;margin-top:10px;font:inherit;font-size:13px;background:transparent;color:inherit;border:1px solid #2a3238;border-radius:8px;padding:8px;resize:vertical" aria-label="Caption">${esc(caption(d))}</textarea>
-    <div class="actions"><button class="primary" data-step="prep">1 · Prepare</button><button class="ghost" data-step="copy">Copy caption</button><button class="ghost" data-step="done">I posted it ✓</button></div></article>`; }
-const FILES = {};
+    <ol class="sub" style="margin:10px 0 0;padding-left:18px"><li>Prepare, then Open Instagram.</li><li>Choose <b>Reel</b>${d.type === 'carousel' ? ' / Post' : ''}, add <b>your song</b>${cover ? ', set the cover from your photos' : ''}.</li><li>Paste the caption (copied below) → Share.</li></ol>
+    <div class="actions"><button class="primary" data-step="prep">1 · Prepare</button><button class="ghost" data-step="done">I posted it ✓</button></div>
+    <div class="postkit" style="margin-top:14px;padding-top:12px;border-top:1px solid #1d252b">
+      <div class="row" style="align-items:center"><b class="grow">Caption</b><button class="ghost" data-step="copy" style="flex:0 0 auto">Copy caption</button></div>
+      <textarea dir="auto" readonly rows="5" style="width:100%;margin-top:8px;font:inherit;font-size:13px;background:transparent;color:inherit;border:1px solid #2a3238;border-radius:8px;padding:8px;resize:vertical" aria-label="Caption">${esc(caption(d))}</textarea>
+      ${cover ? `<div class="row" style="align-items:center;margin-top:12px"><img data-src="${esc(d.cover)}" alt="Cover" style="width:72px;height:128px;object-fit:cover;border-radius:8px"><div class="grow"><b>Cover photo</b><div class="sub" style="margin:4px 0 0">Save it, then in Instagram: Edit cover → Add from camera roll.</div></div></div>
+      <div class="actions"><button class="ghost" data-step="cover">Save cover photo</button></div>` : ''}
+    </div></article>`; }
+const FILES = {}, COVERS = {};
+// iOS only opens the share sheet straight from a tap, so the cover file is built before the tap.
+async function coverFile(d) {
+  if (COVERS[d.id]) return COVERS[d.id];
+  const u = await mediaUrl(d.cover); if (!u) throw new Error('cover not found');
+  const bl = await (await fetch(u)).blob(); return (COVERS[d.id] = new File([bl], `zelvero-${d.id}-cover.jpg`, { type: bl.type || 'image/jpeg' }));
+}
+function prepCovers() { for (const c of document.querySelectorAll('[data-post]')) { const d = S.queue[+c.dataset.post]?.data; if (d?.cover && d.type !== 'carousel') coverFile(d).catch(() => {}); } }
 async function copyCaption(d, card) {
   try { await navigator.clipboard.writeText(caption(d)); return true; } catch {}
   const t = card.querySelector('textarea'); if (!t) return false;   // older iOS fallback
@@ -271,8 +284,13 @@ async function postClick(e) {
     } catch (err) { b.disabled = false; b.textContent = '1 · Prepare'; toast('Could not load the video: ' + err.message); } return true; }
   if (b.dataset.step === 'share') { const files = FILES[d.id];
     let copied = await copyCaption(d, card);
-    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); toast(copied ? 'Caption copied. In Instagram: hold the caption box → Paste.' : 'Video sent. Back here, tap Copy caption, then paste it in Instagram.'); } catch (err) { if (err.name !== 'AbortError') toast(err.message); } }
+    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); toast(copied ? 'Caption copied. In Instagram: hold the caption box → Paste.' : 'Video sent. Back here, tap Copy caption, then paste it in Instagram.'); card.querySelector('.postkit')?.scrollIntoView({ block: 'start' }); } catch (err) { if (err.name !== 'AbortError') toast(err.message); } }
     else { for (const f of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); } toast('Saved to your phone and caption copied. Open Instagram → Reel → pick it.'); }
+    return true; }
+  if (b.dataset.step === 'cover') {
+    let f = COVERS[d.id]; if (!f) { try { f = await coverFile(d); } catch (err) { toast('Could not load the cover: ' + err.message); return true; } }
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f] }); } catch (err) { if (err.name === 'NotAllowedError') toast('Tap Save cover photo again.'); else if (err.name !== 'AbortError') toast(err.message); } }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); toast('Cover downloaded.'); }
     return true; }
   if (b.dataset.step === 'copy') { toast(await copyCaption(d, card) ? 'Caption copied. In Instagram: hold the caption box → Paste.' : 'Copy blocked: hold the caption text above → Select all → Copy.'); return true; }
   if (b.dataset.step === 'done') { if (!confirm('Mark as posted on Instagram?')) return true; d.posted_at = now(); d.publish_mode = 'manual'; hist(d, 'published'); await writeJson(q, `posted ${d.id} (manual)`); toast('Marked as posted. Insights will track it.'); render(); return true; }

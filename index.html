@@ -250,7 +250,7 @@ const FILES = {};
 async function postClick(e) {
   const b = e.target.closest('button[data-step]'); if (!b) return false; const card = b.closest('[data-post]'); const q = S.queue[+card.dataset.post]; const d = q.data;
   if (b.dataset.step === 'prep') { b.disabled = true; b.textContent = 'Preparing…';
-    try { const paths = d.slides || [`media/library/${d.video_asset}`]; FILES[d.id] = await Promise.all(paths.map(async (p, k) => { const u = await mediaUrl(p); const bl = await (await fetch(u)).blob(); return new File([bl], `zelvero-${d.id}-${k + 1}.${p.split('.').pop()}`, { type: bl.type || (p.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg') }); }));
+    try { const paths = d.slides || [`media/library/${d.video_asset}`]; FILES[d.id] = await Promise.all(paths.map(async (p, k) => { const u = await mediaUrl(p); if (!u) throw new Error('file not found: ' + p); const bl = await (await fetch(u)).blob(); if (bl.size < 1000) throw new Error('empty file: ' + p); return new File([bl], `zelvero-${d.id}-${k + 1}.${p.split('.').pop()}`, { type: bl.type || (p.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg') }); }));
       b.textContent = '2 · Open Instagram'; b.dataset.step = 'share'; b.disabled = false; toast('Ready. Tap “Open Instagram”.');
     } catch (err) { b.disabled = false; b.textContent = '1 · Prepare'; toast('Could not load the video: ' + err.message); } return true; }
   if (b.dataset.step === 'share') { const files = FILES[d.id];

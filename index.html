@@ -113,6 +113,15 @@ async function createJson(path, data, msg) { return gh(`/contents/${path}`, { me
 const blobCache = {};
 async function mediaUrl(path) {
   if (!path) return ''; if (blobCache[path]) return blobCache[path];
+  // Videos are 10+ MB: the raw API call fails on iPhone Safari ("Load failed"), so big files come
+  // from the file's download_url (raw.githubusercontent.com, CORS-open, no auth header needed).
+  if (/\.(mp4|mov)$/i.test(path)) {
+    const m = await fetch(`${CFG.api}/repos/${CFG.repo}/contents/${path}`, { headers: { Authorization: `Bearer ${CFG.token}`, Accept: 'application/vnd.github+json' } });
+    if (!m.ok) return '';
+    const meta = await m.json(); if (!meta.download_url) return '';
+    const v = await fetch(meta.download_url, { cache: 'no-store' });
+    if (!v.ok) return ''; return (blobCache[path] = URL.createObjectURL(await v.blob()));
+  }
   const r = await fetch(`${CFG.api}/repos/${CFG.repo}/contents/${path}`, { headers: { Authorization: `Bearer ${CFG.token}`, Accept: 'application/vnd.github.raw' } });
   if (!r.ok) return ''; return (blobCache[path] = URL.createObjectURL(await r.blob()));
 }
